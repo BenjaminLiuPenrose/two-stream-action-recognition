@@ -81,7 +81,7 @@ class Spatial_CNN():
         self.test_video=test_video
 
     def build_model(self):
-        ndata = self.train_loader.__len__()
+        self.ndata = self.train_loader.__len__()
         print ('==> Build model and setup loss and optimizer')
         #build model
         self.model = resnet101(pretrained= True, channel=3, nb_classes = arg.low_dim).cuda()
@@ -89,7 +89,7 @@ class Spatial_CNN():
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.lemniscate = LinearAverageWithWeights(
                                 arg.low_dim,
-                                ndata,
+                                self.ndata,
                                 arg.nce_t,
                                 arg.nce_m,
                             )
@@ -161,7 +161,7 @@ class Spatial_CNN():
             target_var = Variable(index).cuda()
 
             # compute output
-            output = Variable(torch.zeros(len(data_dict['img1']),ndata).float()).cuda()
+            output = Variable(torch.zeros(len(data_dict['img1']),self.ndata).float()).cuda()
             for i in range(len(data_dict)):
                 key = 'img'+str(i)
                 data = data_dict[key]
