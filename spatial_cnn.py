@@ -89,17 +89,8 @@ class Spatial_CNN():
                 checkpoint = torch.load(self.resume)
                 self.start_epoch = checkpoint['epoch']
                 self.best_prec1 = checkpoint['best_prec1']
-                pretrained_dict = checkpoint['state_dict']
-                model_dict = self.model.state_dict()
-                pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-                model_dict.update(pretrained_dict)
-                self.model.load_state_dict(model_dict)
-
-                preoptimizer_dict = checkpoint['optimizer']
-                optimizer_dict = self.optimizer.state_dict()
-                preoptimizer_dict = {k: v for k, v in preoptimizer_dict.items() if k in optimizer_dict}
-                optimizer_dict.update(preoptimizer_dict)
-                self.optimizer.load_state_dict(optimizer_dict)
+                self.model.load_state_dict(checkpoint['state_dict'])
+                self.optimizer.load_state_dict(checkpoint['optimizer'])
                 print("==> loaded checkpoint '{}' (epoch {}) (best_prec1 {})"
                   .format(self.resume, checkpoint['epoch'], self.best_prec1))
             else:
