@@ -137,7 +137,7 @@ class Spatial_CNN():
         end = time.time()
         # mini-batch training
         progress = tqdm(self.train_loader)
-        for i, (data_dict,label) in enumerate(progress):
+        for i, (data_dict,label,_) in enumerate(progress):
 
 
             # measure data loading time
@@ -192,7 +192,7 @@ class Spatial_CNN():
         self.dic_video_level_preds={}
         end = time.time()
         progress = tqdm(self.test_loader)
-        for i, (keys,data,label) in enumerate(progress):
+        for i, (keys,data,label,_) in enumerate(progress):
 
             label = label.cuda(async=True)
             data_var = Variable(data, volatile=True).cuda(async=True)
