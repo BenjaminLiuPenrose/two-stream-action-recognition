@@ -167,7 +167,7 @@ class Spatial_CNN():
                 data = data_dict[key]
                 input_var = Variable(data).cuda()
                 feature = self.model(input_var)
-                output += self.lemniscate(feature, target_var.cuda())
+                output += self.lemniscate(feature, target_var)
 
 
             loss = self.criterion(output, target_var)
