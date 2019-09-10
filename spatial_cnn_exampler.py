@@ -87,10 +87,10 @@ class Spatial_CNN():
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.lemniscate = LinearAverageWithWeights(
-                                args.low_dim,
+                                arg.low_dim,
                                 ndata,
-                                args.nce_t,
-                                args.nce_m,
+                                arg.nce_t,
+                                arg.nce_m,
                             )
         self.optimizer = torch.optim.SGD(list(self.model.parameters()) + list(self.lemniscate.parameters()), self.lr, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience=1,verbose=True)
