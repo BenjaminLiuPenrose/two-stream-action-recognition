@@ -99,7 +99,7 @@ class LinearAverageWithWeights(nn.Module):
         self.memory =  nn.Parameter(
                         F.normalize(torch.rand(outputSize * n_samples_for_each_video, inputSize).mul_(2*stdv).add_(-stdv)) ,
                         requires_grad = False
-                        )
+                        ).cuda()
 
         ### modify 0813
         self.vectorBank = nn.Parameter(
@@ -126,7 +126,7 @@ class LinearAverageWithWeights(nn.Module):
         out.div_(T)
 
         with torch.no_grad():
-            st()
+            # st()
             weight_pos = self.memory.index_select(0, y.data.view(-1)) #.resize_as_(x)
             weight_pos.mul_(momentum)
             # weight_pos.add_(torch.mul(x.data, 1-momentum))
