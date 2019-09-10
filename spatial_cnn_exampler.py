@@ -84,7 +84,7 @@ class Spatial_CNN():
         ndata = self.train_loader.__len__()
         print ('==> Build model and setup loss and optimizer')
         #build model
-        self.model = resnet101(pretrained= True, channel=3).cuda()
+        self.model = resnet101(pretrained= True, channel=3, nb_classes = arg.low_dim).cuda()
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.lemniscate = LinearAverageWithWeights(
