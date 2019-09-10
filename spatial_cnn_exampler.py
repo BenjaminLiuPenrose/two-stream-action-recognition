@@ -105,7 +105,7 @@ class Spatial_CNN():
                 self.best_prec1 = checkpoint['best_prec1']
                 pretrained_dict = checkpoint['state_dict']
                 model_dict = self.model.state_dict()
-                pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and v.size() == model_state[k].size()}
+                pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict and v.size() == model_dict[k].size()}
                 model_dict.update(pretrained_dict)
                 self.model.load_state_dict(model_dict)
 
