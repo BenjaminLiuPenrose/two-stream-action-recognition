@@ -81,7 +81,7 @@ class Spatial_CNN():
         self.test_video=test_video
 
     def build_model(self):
-        self.ndata = self.train_loader.__len__()
+        self.ndata = self.train_loader.__len__() * 15
         print ('==> Build model and setup loss and optimizer')
         #build model
         self.model = resnet101(pretrained= True, channel=3, nb_classes = arg.low_dim).cuda()
@@ -169,7 +169,7 @@ class Spatial_CNN():
                 feature = self.model(input_var)
                 output += self.lemniscate(feature, target_var)
 
-            st()
+            # st()
             loss = self.criterion(output, target_var)
 
             # measure accuracy and record loss
