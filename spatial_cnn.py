@@ -114,7 +114,7 @@ class Spatial_CNN():
             # save model
             if is_best:
                 self.best_prec1 = prec1
-                with open('record/spatial/spatial_video_preds.pickle','wb') as f:
+                with open('record/spatial/spatial_video_preds_0.pickle','wb') as f:
                     pickle.dump(self.dic_video_level_preds,f)
                 f.close()
 
@@ -123,7 +123,7 @@ class Spatial_CNN():
                 'state_dict': self.model.state_dict(),
                 'best_prec1': self.best_prec1,
                 'optimizer' : self.optimizer.state_dict()
-            },is_best,'record/spatial/checkpoint.pth.tar','record/spatial/model_best.pth.tar')
+            },is_best,'record/spatial/checkpoint_0.pth.tar','record/spatial/model_best_0.pth.tar')
 
     def train_1epoch(self):
         print('==> Epoch:[{0}/{1}][training stage]'.format(self.epoch, self.nb_epochs))
@@ -179,7 +179,7 @@ class Spatial_CNN():
                 'Prec@5':[round(top5.avg,4)],
                 'lr': self.optimizer.param_groups[0]['lr']
                 }
-        record_info(info, 'record/spatial/rgb_train.csv','train')
+        record_info(info, 'record/spatial/rgb_train_0.csv','train')
 
     def validate_1epoch(self):
         print('==> Epoch:[{0}/{1}][validation stage]'.format(self.epoch, self.nb_epochs))
