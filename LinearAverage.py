@@ -161,7 +161,7 @@ class LinearAverageWithWeights(nn.Module):
 
         return out
     def parameters(self, recurse=True):
-        for name, param in self.named_parameters(recurse=recurse):
+        for name, param in self.named_parameters(recurse):
             print(name, param)
             yield param
 
