@@ -169,7 +169,7 @@ class Spatial_CNN():
                 feature = self.model(input_var)
                 output += self.lemniscate(feature, target_var)
 
-
+            st()
             loss = self.criterion(output, target_var)
 
             # measure accuracy and record loss
