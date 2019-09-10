@@ -162,8 +162,8 @@ class LinearAverageWithWeights(nn.Module):
         return out
     def parameters(self, recurse=True):
         for name, param in self.named_parameters():
-            print(name, param)
-            yield param
+            if name == 'weights':
+                yield param
 
 # ========================================================================================
 # ============================ For saimese, defined loss function, equivalent to original ========================
