@@ -129,6 +129,7 @@ class LinearAverageWithWeights(nn.Module):
             weight_pos = self.memory.index_select(0, y.data.view(-1)) #.resize_as_(x)
             weight_pos.mul_(momentum)
             # weight_pos.add_(torch.mul(x.data, 1-momentum))
+            st()
             weight_pos.add_(torch.mul(
                     F.normalize(
                         self.weights).index_select(0, y.data.view(-1)
