@@ -81,6 +81,7 @@ class Spatial_CNN():
         self.test_video=test_video
 
     def build_model(self):
+        ndata = self.train_loader.__len__()
         print ('==> Build model and setup loss and optimizer')
         #build model
         self.model = resnet101(pretrained= True, channel=3).cuda()
