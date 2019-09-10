@@ -112,10 +112,8 @@ class Spatial_CNN():
 
                 preoptimizer_dict = checkpoint['optimizer']
                 optimizer_dict = self.optimizer.state_dict()
-                preoptimizer_dict = {k: v for k, v in preoptimizer_dict.items() if k in optimizer_dict}
-                st()
-                print(preoptimizer_dict)
-                optimizer_dict.update(preoptimizer_dict)
+                # preoptimizer_dict = {k: v for k, v in preoptimizer_dict.items() if k in optimizer_dict}
+                # optimizer_dict.update(preoptimizer_dict)
                 self.optimizer.load_state_dict(optimizer_dict)
                 print("==> loaded checkpoint '{}' (epoch {}) (best_prec1 {})"
                   .format(self.resume, checkpoint['epoch'], self.best_prec1))
