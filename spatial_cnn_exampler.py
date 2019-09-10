@@ -81,7 +81,7 @@ class Spatial_CNN():
         self.test_video=test_video
 
     def build_model(self):
-        self.ndata = self.train_loader.__len__() * 16
+        self.ndata = self.train_loader.__len__() * arg.batch_size
         print ('==> Build model and setup loss and optimizer')
         #build model
         self.model = resnet101(pretrained= True, channel=3, nb_classes = arg.low_dim).cuda()
@@ -243,7 +243,7 @@ class Spatial_CNN():
     def frame2_video_level_accuracy(self):
 
         correct = 0
-        video_level_preds = np.zeros((len(self.dic_video_level_preds),101))
+        video_level_preds = np.zeros((len(self.dic_video_level_preds),self.ndata))
         video_level_labels = np.zeros(len(self.dic_video_level_preds))
         ii=0
         for name in sorted(self.dic_video_level_preds.keys()):
