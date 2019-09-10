@@ -160,8 +160,10 @@ class LinearAverageWithWeights(nn.Module):
         # loss(x, class) = -log(exp(x[class]) / (\sum_j exp(x[j]))) = -x[class] + log(\sum_j exp(x[j]))
 
         return out
-    def parameters(self):
-        return self.weights
+    def parameters(self, recurse=True):
+        for name, param in self.named_parameters(recurse=recurse):
+            print(name, param)
+            yield param
 
 # ========================================================================================
 # ============================ For saimese, defined loss function, equivalent to original ========================
