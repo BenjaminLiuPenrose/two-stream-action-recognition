@@ -19,8 +19,9 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import dataloader
 from utils import *
 from network import *
+from LinearAverage import *
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 parser = argparse.ArgumentParser(description='UCF101 spatial stream on resnet101')
 parser.add_argument('--epochs', default=500, type=int, metavar='N', help='number of total epochs')
@@ -29,6 +30,12 @@ parser.add_argument('--lr', default=5e-4, type=float, metavar='LR', help='initia
 parser.add_argument('--evaluate', dest='evaluate', action='store_true', help='evaluate model on validation set')
 parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
+parser.add_argument('--low-dim', default=128, type=int,
+                    metavar='D', help='feature dimension')
+parser.add_argument('--nce-t', default=0.1, type=float,
+                    metavar='T', help='temperature parameter for softmax')
+parser.add_argument('--nce-m', default=0.5, type=float,
+                    metavar='M', help='momentum for non-parametric updates')
 
 def main():
     global arg
@@ -79,7 +86,13 @@ class Spatial_CNN():
         self.model = resnet101(pretrained= True, channel=3).cuda()
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()
-        self.optimizer = torch.optim.SGD(self.model.parameters(), self.lr, momentum=0.9)
+        self.lemniscate = LinearAverageWithWeights(
+                                args.low_dim,
+                                ndata,
+                                args.nce_t,
+                                args.nce_m,
+                            )
+        self.optimizer = torch.optim.SGD(list(self.model.parameters()) + list(self.lemniscate.parameters()), self.lr, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience=1,verbose=True)
 
     def resume_and_evaluate(self):
@@ -137,14 +150,14 @@ class Spatial_CNN():
         end = time.time()
         # mini-batch training
         progress = tqdm(self.train_loader)
-        for i, (data_dict,label) in enumerate(progress):
+        for i, (data_dict, label, index) in enumerate(progress):
 
 
             # measure data loading time
             data_time.update(time.time() - end)
 
             label = label.cuda(async=True)
-            target_var = Variable(label).cuda()
+            target_var = Variable(index).cuda()
 
             # compute output
             output = Variable(torch.zeros(len(data_dict['img1']),101).float()).cuda()
@@ -152,7 +165,9 @@ class Spatial_CNN():
                 key = 'img'+str(i)
                 data = data_dict[key]
                 input_var = Variable(data).cuda()
-                output += self.model(input_var)
+                feature = self.model(input_var)
+                output += self.lemniscate(feature)
+
 
             loss = self.criterion(output, target_var)
 
@@ -192,7 +207,7 @@ class Spatial_CNN():
         self.dic_video_level_preds={}
         end = time.time()
         progress = tqdm(self.test_loader)
-        for i, (keys,data,label) in enumerate(progress):
+        for i, (keys,data,label,index) in enumerate(progress):
 
             label = label.cuda(async=True)
             data_var = Variable(data, volatile=True).cuda(async=True)
