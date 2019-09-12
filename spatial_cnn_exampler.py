@@ -85,7 +85,7 @@ class Spatial_CNN():
         self.ndata = self.train_loader.__len__() * arg.batch_size
         print ('==> Build model and setup loss and optimizer')
         #build model
-        self.model = resnet101(pretrained= True, channel=3, nb_classes = arg.low_dim).cuda()
+        self.model = resnet18(pretrained= True, channel=3, nb_classes = arg.low_dim).cuda()
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.lemniscate = LinearAverageWithWeights(
@@ -168,22 +168,29 @@ class Spatial_CNN():
             data_time.update(time.time() - end)
 
             label = label.cuda(async=True)
-            target_var = Variable(index).cuda()
+            target_var = Variable(label).cuda()
+            index_var = Variable(index).cuda()
 
             # compute output
-            output = Variable(torch.zeros(len(data_dict['img1']),self.ndata).float()).cuda()
-            for i in range(len(data_dict)):
-                key = 'img'+str(i)
+            feature = Variable(torch.zeros(len(data_dict['img1']),arg.low_dim).float()).cuda()
+            for j in range(len(data_dict)):
+                if j > 0:
+                    break
+                key = 'img'+str(j)
                 data = data_dict[key]
                 input_var = Variable(data).cuda()
-                feature = self.model(input_var)
-                output += self.lemniscate(feature, target_var)
+
+                feature += self.model(input_var)
+            if i > 200:
+                st()
+            output = self.lemniscate(feature, index_var)
 
             # st()
-            loss = self.criterion(output, target_var)
+            loss = self.criterion(output, index_var)
+            # loss = self.criterion(feature, target_var)
 
             # measure accuracy and record loss
-            prec1, prec5 = accuracy(output.data, label, topk=(1, 5))
+            prec1, prec5 = accuracy(output.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = arg.nce_t, topk=(1, 5))
             losses.update(loss.data[0], data.size(0))
             top1.update(prec1[0], data.size(0))
             top5.update(prec5[0], data.size(0))
@@ -218,36 +225,40 @@ class Spatial_CNN():
         self.dic_video_level_preds={}
         end = time.time()
         progress = tqdm(self.test_loader)
-        for i, (keys,data,label,index) in enumerate(progress):
+        with torch.no_grad():
+            for i, (keys,data,label,index) in enumerate(progress):
 
-            label = label.cuda(async=True)
-            data_var = Variable(data, volatile=True).cuda(async=True)
-            label_var = Variable(label, volatile=True).cuda(async=True)
+                label = label.cuda(async=True)
+                data_var = Variable(data, volatile=True).cuda(async=True)
+                label_var = Variable(label, volatile=True).cuda(async=True)
+                index_var = Variable(index, volatile=True).cuda(async=True)
 
-            # compute output
-            output = self.model(data_var)
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
-            #Calculate video level prediction
-            preds = output.data.cpu().numpy()
-            nb_data = preds.shape[0]
-            for j in range(nb_data):
-                videoName = keys[j].split('/',1)[0]
-                if videoName not in self.dic_video_level_preds.keys():
-                    self.dic_video_level_preds[videoName] = preds[j,:]
-                else:
-                    self.dic_video_level_preds[videoName] += preds[j,:]
+                # compute output
+                output = self.model(data_var)
+                if i > 100:
+                    st()
+                # measure elapsed time
+                batch_time.update(time.time() - end)
+                end = time.time()
+                #Calculate video level prediction
+                preds = output.data.cpu().numpy()
+                nb_data = preds.shape[0]
+                for j in range(nb_data):
+                    videoName = keys[j].split('/',1)[0]
+                    if videoName not in self.dic_video_level_preds.keys():
+                        self.dic_video_level_preds[videoName] = preds[j,:]
+                    else:
+                        self.dic_video_level_preds[videoName] += preds[j,:]
 
-        video_top1, video_top5, video_loss = self.frame2_video_level_accuracy()
+            video_top1, video_top5, video_loss = self.frame2_video_level_accuracy()
 
 
-        info = {'Epoch':[self.epoch],
-                'Batch Time':[round(batch_time.avg,3)],
-                'Loss':[round(video_loss,5)],
-                'Prec@1':[round(video_top1,3)],
-                'Prec@5':[round(video_top5,3)]}
-        record_info(info, 'record/spatial/rgb_test.csv','test')
+            info = {'Epoch':[self.epoch],
+                    'Batch Time':[round(batch_time.avg,3)],
+                    'Loss':[round(video_loss,5)],
+                    'Prec@1':[round(video_top1,3)],
+                    'Prec@5':[round(video_top5,3)]}
+            record_info(info, 'record/spatial/rgb_test.csv','test')
         return video_top1, video_loss
 
     def frame2_video_level_accuracy(self):
