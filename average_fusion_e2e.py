@@ -41,7 +41,7 @@ def main():
     print arg
 
     rgb_preds='record/spatial/spatial_video_preds.pickle'
-    opf_preds = 'record/motion/motion_video_preds.pickle
+    opf_preds = 'record/motion/motion_video_preds.pickle'
 
     data_loader_spacial = dataloader.spatial_dataloader(
                         BATCH_SIZE=arg.batch_size,
