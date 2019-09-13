@@ -98,6 +98,9 @@ def main():
     best_prec1_spacial = 0
     best_prec1_motion = 0
     for epoch in range(arg.start_epoch, arg.epochs):
+        model_spacial.epoch = epoch
+        model_motion.epoch = epoch
+
         model_spacial.train_1epoch()
         model_motion.train_1epoch()
 
