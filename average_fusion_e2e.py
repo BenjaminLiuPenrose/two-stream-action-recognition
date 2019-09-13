@@ -153,6 +153,7 @@ def main():
             )
 
         rgb = model_spacial.dic_video_level_preds
+        opf = model_motion.dic_video_level_preds
         video_level_preds = np.zeros((len(rgb.keys()), 101))
         video_level_labels = np.zeros(len(rgb.keys()))
         correct = 0
@@ -172,7 +173,7 @@ def main():
         video_level_labels = torch.from_numpy(video_level_labels).long()
         video_level_preds = torch.from_numpy(video_level_preds).float()
 
-        top1,top5 = accuracy(video_level_preds, video_level_labels, topk=(1,5))
+        top1,top5 = accuracy_old(video_level_preds, video_level_labels, topk=(1,5))
 
 
 

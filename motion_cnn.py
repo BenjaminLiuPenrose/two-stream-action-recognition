@@ -45,9 +45,9 @@ def main():
                         ucf_split='01',
                         in_channel=10,
                         )
-    
+
     train_loader,test_loader, test_video = data_loader.run()
-    #Model 
+    #Model
     model = Motion_CNN(
                         # Data Loader
                         train_loader=train_loader,
@@ -107,12 +107,12 @@ class Motion_CNN():
             self.epoch=0
             prec1, val_loss = self.validate_1epoch()
             return
-    
+
     def run(self):
         self.build_model()
         self.resume_and_evaluate()
         cudnn.benchmark = True
-        
+
         for self.epoch in range(self.start_epoch, self.nb_epochs):
             self.train_1epoch()
             prec1, val_loss = self.validate_1epoch()
@@ -124,8 +124,8 @@ class Motion_CNN():
                 self.best_prec1 = prec1
                 with open('record/motion/motion_video_preds.pickle','wb') as f:
                     pickle.dump(self.dic_video_level_preds,f)
-                f.close() 
-            
+                f.close()
+
             save_checkpoint({
                 'epoch': self.epoch,
                 'state_dict': self.model.state_dict(),
@@ -142,7 +142,7 @@ class Motion_CNN():
         top1 = AverageMeter()
         top5 = AverageMeter()
         #switch to train mode
-        self.model.train()    
+        self.model.train()
         end = time.time()
         # mini-batch training
         progress = tqdm(self.train_loader)
@@ -150,7 +150,7 @@ class Motion_CNN():
 
             # measure data loading time
             data_time.update(time.time() - end)
-            
+
             label = label.cuda(async=True)
             input_var = Variable(data).cuda()
             target_var = Variable(label).cuda()
@@ -160,7 +160,7 @@ class Motion_CNN():
             loss = self.criterion(output, target_var)
 
             # measure accuracy and record loss
-            prec1, prec5 = accuracy(output.data, label, topk=(1, 5))
+            prec1, prec5 = accuracy_old(output.data, label, topk=(1, 5))
             losses.update(loss.data[0], data.size(0))
             top1.update(prec1[0], data.size(0))
             top5.update(prec5[0], data.size(0))
@@ -173,7 +173,7 @@ class Motion_CNN():
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
-        
+
         info = {'Epoch':[self.epoch],
                 'Batch Time':[round(batch_time.avg,3)],
                 'Data Time':[round(data_time.avg,3)],
@@ -197,7 +197,7 @@ class Motion_CNN():
         end = time.time()
         progress = tqdm(self.test_loader)
         for i, (keys,data,label) in enumerate(progress):
-            
+
             #data = data.sub_(127.353346189).div_(14.971742063)
             label = label.cuda(async=True)
             data_var = Variable(data, volatile=True).cuda(async=True)
@@ -218,7 +218,7 @@ class Motion_CNN():
                     self.dic_video_level_preds[videoName] = preds[j,:]
                 else:
                     self.dic_video_level_preds[videoName] += preds[j,:]
-                    
+
         #Frame to video level accuracy
         video_top1, video_top5, video_loss = self.frame2_video_level_accuracy()
         info = {'Epoch':[self.epoch],
@@ -231,7 +231,7 @@ class Motion_CNN():
         return video_top1, video_loss
 
     def frame2_video_level_accuracy(self):
-     
+
         correct = 0
         video_level_preds = np.zeros((len(self.dic_video_level_preds),101))
         video_level_labels = np.zeros(len(self.dic_video_level_preds))
@@ -241,10 +241,10 @@ class Motion_CNN():
 
             preds = self.dic_video_level_preds[name]
             label = int(self.test_video[name])-1
-                
+
             video_level_preds[ii,:] = preds
             video_level_labels[ii] = label
-            ii+=1         
+            ii+=1
             if np.argmax(preds) == (label):
                 correct+=1
 
@@ -252,12 +252,12 @@ class Motion_CNN():
         video_level_labels = torch.from_numpy(video_level_labels).long()
         video_level_preds = torch.from_numpy(video_level_preds).float()
 
-        loss = self.criterion(Variable(video_level_preds).cuda(), Variable(video_level_labels).cuda())    
-        top1,top5 = accuracy(video_level_preds, video_level_labels, topk=(1,5))     
-                            
+        loss = self.criterion(Variable(video_level_preds).cuda(), Variable(video_level_labels).cuda())
+        top1,top5 = accuracy_old(video_level_preds, video_level_labels, topk=(1,5))
+
         top1 = float(top1.numpy())
         top5 = float(top5.numpy())
-            
+
         return top1,top5,loss.data.cpu().numpy()
 
 if __name__=='__main__':
