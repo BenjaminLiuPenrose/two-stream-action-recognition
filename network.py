@@ -158,12 +158,12 @@ class ResNet(nn.Module):
         return out
 
 
-def resnet18(pretrained=False, channel= 20, nb_classes=nb_classes, **kwargs):
+def resnet18(pretrained=False, channel= 20, nb_classes=101, **kwargs):
     """Constructs a ResNet-18 model.
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = ResNet(BasicBlock, [2, 2, 2, 2], nb_classes=101, channel=channel, **kwargs)
+    model = ResNet(BasicBlock, [2, 2, 2, 2], nb_classes=nb_classes, channel=channel, **kwargs)
     if pretrained:
        pretrain_dict = model_zoo.load_url(model_urls['resnet18'])                  # modify pretrain code
        model_dict = model.state_dict()
@@ -172,9 +172,9 @@ def resnet18(pretrained=False, channel= 20, nb_classes=nb_classes, **kwargs):
     return model
 
 
-def resnet34(pretrained=False, channel= 20, nb_classes=nb_classes, **kwargs):
+def resnet34(pretrained=False, channel= 20, nb_classes=101, **kwargs):
 
-    model = ResNet(BasicBlock, [3, 4, 6, 3], nb_classes=101, channel=channel, **kwargs)
+    model = ResNet(BasicBlock, [3, 4, 6, 3], nb_classes=nb_classes, channel=channel, **kwargs)
     if pretrained:
        pretrain_dict = model_zoo.load_url(model_urls['resnet34'])                  # modify pretrain code
        model_dict = model.state_dict()
