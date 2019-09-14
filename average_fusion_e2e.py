@@ -118,7 +118,7 @@ def main():
         # store if it is best
         if is_best_spacial:
             best_prec1_spacial = prec1_spacial
-            with oepn(rgb_preds, 'wb') as f:
+            with open(rgb_preds, 'wb') as f:
                 pickle.dump(model_spacial.dic_video_level_preds, f)
             f.close()
 
