@@ -63,13 +63,14 @@ def main():
                         evaluate=arg.evaluate,
                         train_loader=train_loader,
                         test_loader=test_loader,
-                        test_video=test_video
+                        test_video=test_video,
+                        arg=arg
     )
     #Training
     model.run()
 
 class Spatial_CNN():
-    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, test_video):
+    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, test_video, arg):
         self.nb_epochs=nb_epochs
         self.lr=lr
         self.batch_size=batch_size
@@ -80,19 +81,20 @@ class Spatial_CNN():
         self.test_loader=test_loader
         self.best_prec1=0
         self.test_video=test_video
+        self.arg=arg
 
     def build_model(self):
-        self.ndata = self.train_loader.__len__() * arg.batch_size
+        self.ndata = self.train_loader.__len__() * self.batch_size
         print ('==> Build model and setup loss and optimizer')
         #build model
-        self.model = resnet18(pretrained= True, channel=3, nb_classes = arg.low_dim).cuda()
+        self.model = resnet18(pretrained= True, channel=3, nb_classes = self.arg.low_dim).cuda()
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.lemniscate = LinearAverageWithWeights(
-                                arg.low_dim,
+                                self.arg.low_dim,
                                 self.ndata,
-                                arg.nce_t,
-                                arg.nce_m,
+                                self.arg.nce_t,
+                                self.arg.nce_m,
                             )
         self.optimizer = torch.optim.SGD(list(self.model.parameters()) + list(self.lemniscate.parameters()), self.lr, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience=1,verbose=True)
@@ -172,7 +174,7 @@ class Spatial_CNN():
             index_var = Variable(index).cuda()
 
             # compute output
-            feature = Variable(torch.zeros(len(data_dict['img1']),arg.low_dim).float()).cuda()
+            feature = Variable(torch.zeros(len(data_dict['img1']),self.arg.low_dim).float()).cuda()
             for j in range(len(data_dict)):
                 if j > 0:
                     break
@@ -190,7 +192,7 @@ class Spatial_CNN():
             # loss = self.criterion(feature, target_var)
 
             # measure accuracy and record loss
-            prec1, prec5 = accuracy(output.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = arg.nce_t, topk=(1, 5))
+            prec1, prec5 = accuracy(output.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = self.arg.nce_t, topk=(1, 5))
             losses.update(loss.data[0], data.size(0))
             top1.update(prec1[0], data.size(0))
             top5.update(prec5[0], data.size(0))
@@ -264,7 +266,7 @@ class Spatial_CNN():
     def frame2_video_level_accuracy(self):
 
         correct = 0
-        video_level_preds = np.zeros((len(self.dic_video_level_preds),arg.low_dim))
+        video_level_preds = np.zeros((len(self.dic_video_level_preds),self.arg.low_dim))
         video_level_labels = np.zeros(len(self.dic_video_level_preds))
         ii=0
         for name in sorted(self.dic_video_level_preds.keys()):

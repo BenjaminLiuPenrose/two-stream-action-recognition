@@ -162,7 +162,7 @@ def main():
             r = rgb[name]
             o = opf[name]
 
-            label = int(test_video[name])-1
+            label = int(test_video_spacial[name])-1
 
             video_level_preds[ii,:] = (r+o)
             video_level_labels[ii] = label

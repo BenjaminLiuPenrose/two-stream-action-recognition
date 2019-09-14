@@ -34,6 +34,12 @@ parser.add_argument('--lr', default=5e-4, type=float, metavar='LR', help='initia
 parser.add_argument('--evaluate', dest='evaluate', action='store_true', help='evaluate model on validation set')
 parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
+parser.add_argument('--low-dim', default=128, type=int,
+                    metavar='D', help='feature dimension')
+parser.add_argument('--nce-t', default=0.1, type=float,
+                    metavar='T', help='temperature parameter for softmax')
+parser.add_argument('--nce-m', default=0.5, type=float,
+                    metavar='M', help='momentum for non-parametric updates')
 
 def main():
     global arg
@@ -71,7 +77,8 @@ def main():
                         evaluate=arg.evaluate,
                         train_loader=train_loader_spacial,
                         test_loader=test_loader_spacial,
-                        test_video=test_video_spacial
+                        test_video=test_video_spacial,
+                        arg = arg
     )
     model_motion = Motion_CNN(
                         # Data Loader
@@ -86,7 +93,7 @@ def main():
                         lr=arg.lr,
                         batch_size=arg.batch_size,
                         channel = 10*2,
-                        test_video=test_video_motion
+                        test_video=test_video_motion,
                         )
 
     model_spacial.build_model()
