@@ -284,7 +284,7 @@ class Spatial_CNN():
         video_level_labels = torch.from_numpy(video_level_labels).long()
         video_level_preds = torch.from_numpy(video_level_preds).float()
 
-        top1,top5 = accuracy(video_level_preds, video_level_labels, topk=(1,5))
+        top1,top5 = accuracy(video_level_preds, video_level_labels, lemniscate = self.lemniscate, trainloader = self.train_loader, topk=(1,5))
         loss = self.criterion(Variable(video_level_preds).cuda(), Variable(video_level_labels).cuda())
 
         top1 = float(top1.numpy())
