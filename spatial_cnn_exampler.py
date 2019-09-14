@@ -181,8 +181,8 @@ class Spatial_CNN():
                 input_var = Variable(data).cuda()
 
                 feature += self.model(input_var)
-            if i > 200:
-                st()
+            # if i > 200:
+            #     st()
             output = self.lemniscate(feature, index_var)
 
             # st()
@@ -235,8 +235,8 @@ class Spatial_CNN():
 
                 # compute output
                 output = self.model(data_var)
-                if i > 100:
-                    st()
+                # if i > 100:
+                #     st()
                 # measure elapsed time
                 batch_time.update(time.time() - end)
                 end = time.time()
