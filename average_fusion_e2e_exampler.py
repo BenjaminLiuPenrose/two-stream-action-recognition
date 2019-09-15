@@ -170,6 +170,7 @@ def main():
         correct = 0
         ii = 0
         for name in sorted(rgb.keys()):
+            st()
             r = rgb[name][:101]
             o = opf[name]
 
