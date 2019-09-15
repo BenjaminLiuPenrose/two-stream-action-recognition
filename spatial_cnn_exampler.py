@@ -287,8 +287,8 @@ class Spatial_CNN():
         top1,top5 = accuracy(video_level_preds, video_level_labels, lemniscate = self.lemniscate, trainloader = self.train_loader, topk=(1,5))
         loss = self.criterion(Variable(video_level_preds).cuda(), Variable(video_level_labels).cuda())
 
-        top1 = float(top1.numpy())
-        top5 = float(top5.numpy())
+        top1 = float(top1.cpu().numpy())
+        top5 = float(top5.cpu().numpy())
 
         #print(' * Video level Prec@1 {top1:.3f}, Video level Prec@5 {top5:.3f}'.format(top1=top1, top5=top5))
         return top1,top5,loss.data.cpu().numpy()
