@@ -170,7 +170,7 @@ def main():
         correct = 0
         ii = 0
         for name in sorted(rgb.keys()):
-            r = rgb[name]
+            r = rgb[name][:, :101]
             o = opf[name]
 
             label = int(test_video_spacial[name])-1
