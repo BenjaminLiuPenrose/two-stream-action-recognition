@@ -165,7 +165,7 @@ def main():
 
         rgb = model_spacial.dic_video_level_preds
         opf = model_motion.dic_video_level_preds
-        video_level_preds = np.zeros((len(rgb.keys()), 101))
+        video_level_preds = np.zeros((len(rgb.keys()), arg.low_dim))
         video_level_labels = np.zeros(len(rgb.keys()))
         correct = 0
         ii = 0
