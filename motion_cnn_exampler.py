@@ -19,6 +19,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from utils import *
 from network import *
 import dataloader
+from LinearAverage import *
 
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
