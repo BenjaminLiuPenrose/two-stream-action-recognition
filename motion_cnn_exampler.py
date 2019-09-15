@@ -30,6 +30,12 @@ parser.add_argument('--lr', default=1e-2, type=float, metavar='LR', help='initia
 parser.add_argument('--evaluate', dest='evaluate', action='store_true', help='evaluate model on validation set')
 parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
+parser.add_argument('--low-dim', default=128, type=int,
+                    metavar='D', help='feature dimension')
+parser.add_argument('--nce-t', default=0.1, type=float,
+                    metavar='T', help='temperature parameter for softmax')
+parser.add_argument('--nce-m', default=0.5, type=float,
+                    metavar='M', help='momentum for non-parametric updates')
 
 def main():
     global arg
@@ -87,6 +93,12 @@ class Motion_CNN():
         #print self.model
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()
+        self.lemniscate = LinearAverageWithWeights(
+                                self.arg.low_dim,
+                                self.ndata,
+                                self.arg.nce_t,
+                                self.arg.nce_m,
+                            )
         self.optimizer = torch.optim.SGD(self.model.parameters(), self.lr, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience=1,verbose=True)
 
@@ -122,7 +134,7 @@ class Motion_CNN():
             # save model
             if is_best:
                 self.best_prec1 = prec1
-                with open('record/motion/motion_video_preds.pickle','wb') as f:
+                with open('record/motion/motion_video_preds_x.pickle','wb') as f:
                     pickle.dump(self.dic_video_level_preds,f)
                 f.close()
 
@@ -131,7 +143,7 @@ class Motion_CNN():
                 'state_dict': self.model.state_dict(),
                 'best_prec1': self.best_prec1,
                 'optimizer' : self.optimizer.state_dict()
-            },is_best,'record/motion/checkpoint.pth.tar','record/motion/model_best.pth.tar')
+            },is_best,'record/motion/checkpoint_x.pth.tar','record/motion/model_best_x.pth.tar')
 
     def train_1epoch(self):
         print('OPTCNN==> Epoch:[{0}/{1}][training stage]'.format(self.epoch, self.nb_epochs))
@@ -146,7 +158,7 @@ class Motion_CNN():
         end = time.time()
         # mini-batch training
         progress = tqdm(self.train_loader)
-        for i, (data,label) in enumerate(progress):
+        for i, (data,label,index) in enumerate(progress):
 
             # measure data loading time
             data_time.update(time.time() - end)
@@ -154,13 +166,17 @@ class Motion_CNN():
             label = label.cuda(async=True)
             input_var = Variable(data).cuda()
             target_var = Variable(label).cuda()
+            index_var = Variable(index).cuda()
 
             # compute output
-            output = self.model(input_var)
-            loss = self.criterion(output, target_var)
+            feature = self.model(input_var)
+            output = self.lemniscate(feature, index_var)
+            # loss = self.criterion(output, target_var)
+            loss = self.criterion(output, index_var)
 
             # measure accuracy and record loss
-            prec1, prec5 = accuracy_old(output.data, label, topk=(1, 5))
+            # prec1, prec5 = accuracy(output.data, label, topk=(1, 5))
+            prec1, prec5 = accuracy(feature.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = self.arg.nce_t, topk=(1, 5))
             losses.update(loss.data.item(), data.size(0))
             top1.update(prec1.item(), data.size(0))
             top5.update(prec5.item(), data.size(0))
@@ -196,12 +212,13 @@ class Motion_CNN():
         self.dic_video_level_preds={}
         end = time.time()
         progress = tqdm(self.test_loader)
-        for i, (keys,data,label) in enumerate(progress):
+        for i, (keys,data,label,index) in enumerate(progress):
 
             #data = data.sub_(127.353346189).div_(14.971742063)
             label = label.cuda(async=True)
             data_var = Variable(data, volatile=True).cuda(async=True)
             label_var = Variable(label, volatile=True).cuda(async=True)
+            index_var = Variable(index, volatile=True).cuda(async=True)
 
             # compute output
             output = self.model(data_var)
@@ -253,7 +270,7 @@ class Motion_CNN():
         video_level_preds = torch.from_numpy(video_level_preds).float()
 
         loss = self.criterion(Variable(video_level_preds).cuda(), Variable(video_level_labels).cuda())
-        top1,top5 = accuracy_old(video_level_preds, video_level_labels, topk=(1,5))
+        top1,top5 = accuracy(video_level_preds, video_level_labels, lemniscate = self.lemniscate, trainloader = self.train_loader, topk=(1,5))
 
         top1 = float(top1.numpy())
         top5 = float(top5.numpy())

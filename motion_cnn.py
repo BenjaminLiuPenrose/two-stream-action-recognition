@@ -146,7 +146,7 @@ class Motion_CNN():
         end = time.time()
         # mini-batch training
         progress = tqdm(self.train_loader)
-        for i, (data,label) in enumerate(progress):
+        for i, (data,label,_) in enumerate(progress):
 
             # measure data loading time
             data_time.update(time.time() - end)
@@ -196,7 +196,7 @@ class Motion_CNN():
         self.dic_video_level_preds={}
         end = time.time()
         progress = tqdm(self.test_loader)
-        for i, (keys,data,label) in enumerate(progress):
+        for i, (keys,data,label,_) in enumerate(progress):
 
             #data = data.sub_(127.353346189).div_(14.971742063)
             label = label.cuda(async=True)
