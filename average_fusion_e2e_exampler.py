@@ -24,7 +24,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from network import *
 
 from spatial_cnn_exampler import Spatial_CNN
-from motion_cnn import Motion_CNN
+from motion_cnn_exampler import Motion_CNN
 
 
 parser = argparse.ArgumentParser(description='UCF101 spatial stream on resnet101')
