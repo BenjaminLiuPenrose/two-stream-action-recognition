@@ -152,7 +152,7 @@ class Spatial_CNN():
             },is_best,'record/spatial/checkpoint.pth.tar','record/spatial/model_best.pth.tar')
 
     def train_1epoch(self):
-        print('==> Epoch:[{0}/{1}][training stage]'.format(self.epoch, self.nb_epochs))
+        print('SPCNN==> Epoch:[{0}/{1}][training stage]'.format(self.epoch, self.nb_epochs))
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
@@ -217,7 +217,7 @@ class Spatial_CNN():
         record_info(info, 'record/spatial/rgb_train.csv','train')
 
     def validate_1epoch(self):
-        print('==> Epoch:[{0}/{1}][validation stage]'.format(self.epoch, self.nb_epochs))
+        print('SPCNN==> Epoch:[{0}/{1}][validation stage]'.format(self.epoch, self.nb_epochs))
         batch_time = AverageMeter()
         losses = AverageMeter()
         top1 = AverageMeter()

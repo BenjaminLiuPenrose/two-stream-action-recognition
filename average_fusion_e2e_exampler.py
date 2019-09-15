@@ -104,6 +104,10 @@ def main():
     cudnn.benchmark = True
     best_prec1_spacial = 0
     best_prec1_motion = 0
+    batch_time = AverageMeter()
+    top1_acc = AverageMeter()
+    top5_acc = AverageMeter()
+    end = time.time()
     for epoch in range(arg.start_epoch, arg.epochs):
         model_spacial.epoch = epoch
         model_motion.epoch = epoch
@@ -182,7 +186,19 @@ def main():
 
         top1,top5 = accuracy_old(video_level_preds, video_level_labels, topk=(1,5))
 
+        batch_time.update(time.time() - end)
+        end = time.time()
+        top1_acc.update(top1)
+        top5_acc.update(top5)
+        video_loss = 0
 
+
+        info = {'Epoch':[epoch],
+                'Batch Time':[round(batch_time.avg,3)],
+                'Loss':[round(video_loss,5)],
+                'Prec@1':[round(top1_acc.avg,3)],
+                'Prec@5':[round(top5_acc.avg,3)]}
+        record_info(info, 'record/fusion_test_x.csv','test')
 
 
 

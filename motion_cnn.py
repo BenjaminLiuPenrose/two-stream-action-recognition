@@ -134,7 +134,7 @@ class Motion_CNN():
             },is_best,'record/motion/checkpoint.pth.tar','record/motion/model_best.pth.tar')
 
     def train_1epoch(self):
-        print('==> Epoch:[{0}/{1}][training stage]'.format(self.epoch, self.nb_epochs))
+        print('OPTCNN==> Epoch:[{0}/{1}][training stage]'.format(self.epoch, self.nb_epochs))
 
         batch_time = AverageMeter()
         data_time = AverageMeter()
@@ -185,7 +185,7 @@ class Motion_CNN():
         record_info(info, 'record/motion/opf_train.csv','train')
 
     def validate_1epoch(self):
-        print('==> Epoch:[{0}/{1}][validation stage]'.format(self.epoch, self.nb_epochs))
+        print('OPTCNN==> Epoch:[{0}/{1}][validation stage]'.format(self.epoch, self.nb_epochs))
 
         batch_time = AverageMeter()
         losses = AverageMeter()

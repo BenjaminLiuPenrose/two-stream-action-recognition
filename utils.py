@@ -25,6 +25,7 @@ def accuracy(outputs, targets, lemniscate = None, trainloader = None, sigma = 0.
     K = 200
 
     features = outputs.cuda()
+    targets = targets.cuda()
     trainLabels = torch.LongTensor(trainloader.dataset.values).cuda()
     trainLabels = torch.sub(trainLabels, 1)
     trainFeatures = lemniscate.memory.t()[:,:trainLabels.shape[0]]
