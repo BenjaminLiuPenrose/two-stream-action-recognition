@@ -94,6 +94,7 @@ def main():
                         batch_size=arg.batch_size,
                         channel = 10*2,
                         test_video=test_video_motion,
+                        arg = arg
                         )
 
     model_spacial.build_model()

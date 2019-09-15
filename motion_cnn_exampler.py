@@ -73,7 +73,7 @@ def main():
     model.run()
 
 class Motion_CNN():
-    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video):
+    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video,arg):
         self.nb_epochs=nb_epochs
         self.lr=lr
         self.batch_size=batch_size
@@ -85,6 +85,7 @@ class Motion_CNN():
         self.best_prec1=0
         self.channel=channel
         self.test_video=test_video
+        self.arg = arg
 
     def build_model(self):
         print ('==> Build model and setup loss and optimizer')
