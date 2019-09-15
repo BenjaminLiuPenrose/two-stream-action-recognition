@@ -193,9 +193,9 @@ class Spatial_CNN():
 
             # measure accuracy and record loss
             prec1, prec5 = accuracy(feature.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = self.arg.nce_t, topk=(1, 5))
-            losses.update(loss.data[0], data.size(0))
-            top1.update(prec1[0], data.size(0))
-            top5.update(prec5[0], data.size(0))
+            losses.update(loss.item(), data.size(0))
+            top1.update(prec1.item(), data.size(0))
+            top5.update(prec5.item(), data.size(0))
 
             # compute gradient and do SGD step
             self.optimizer.zero_grad()
