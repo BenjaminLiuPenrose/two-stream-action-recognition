@@ -188,11 +188,11 @@ class Spatial_CNN():
             output = self.lemniscate(feature, index_var)
 
             # st()
-            loss = self.criterion(output, index_var)
-            # loss = self.criterion(feature, target_var)
+            # loss = self.criterion(output, index_var)
+            loss = self.criterion(feature, target_var)
             st()
             # measure accuracy and record loss
-            prec1, prec5 = accuracy(feature.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = self.arg.nce_t, topk=(1, 5))
+            prec1, prec5 = accuracy(output.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = self.arg.nce_t, topk=(1, 5))
             losses.update(loss.item(), data.size(0))
             top1.update(prec1.item(), data.size(0))
             top5.update(prec5.item(), data.size(0))
