@@ -102,7 +102,7 @@ class Motion_CNN():
                                 self.arg.nce_t,
                                 self.arg.nce_m,
                             )
-        self.optimizer = torch.optim.SGD(self.model.parameters(), self.lr, momentum=0.9)
+        self.optimizer = torch.optim.SGD(list(self.model.parameters()) + list(self.lemniscate.parameters()), self.lr, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience=1,verbose=True)
 
     def resume_and_evaluate(self):

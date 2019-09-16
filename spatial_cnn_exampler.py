@@ -172,7 +172,7 @@ class Spatial_CNN():
             label = label.cuda(async=True)
             target_var = Variable(label).cuda()
             index_var = Variable(index).cuda()
-
+            self.optimizer.zero_grad()
             # compute output
             feature = Variable(torch.zeros(len(data_dict['img1']),self.arg.low_dim).float()).cuda()
             for j in range(len(data_dict)):
@@ -198,7 +198,7 @@ class Spatial_CNN():
             top5.update(prec5.item(), data.size(0))
 
             # compute gradient and do SGD step
-            self.optimizer.zero_grad()
+            # self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
