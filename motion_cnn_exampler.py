@@ -176,7 +176,7 @@ class Motion_CNN():
             output = self.lemniscate(feature, index_var)
             # loss = self.criterion(output, target_var)
             loss = self.criterion(output, index_var)
-            st()
+            # st()
 
             # measure accuracy and record loss
             # prec1, prec5 = accuracy(output.data, label, topk=(1, 5))
