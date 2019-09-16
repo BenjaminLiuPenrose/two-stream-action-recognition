@@ -35,7 +35,6 @@ class spatial_dataset(Dataset):
         return transformed_img
 
     def __getitem__(self, idx):
-        st()
         if self.mode == 'train':
             video_name, nb_clips = self.keys[idx].split(' ')
             nb_clips = int(nb_clips)
