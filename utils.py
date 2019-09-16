@@ -44,7 +44,7 @@ def accuracy(outputs, targets, lemniscate = None, trainloader = None, sigma = 0.
     yd_transform = yd.clone().div_(sigma).exp_()
     probs = torch.sum(torch.mul(retrieval_one_hot.view(batch_size, -1 , C), yd_transform.view(batch_size, -1, 1)), 1)
     _, predictions = probs.sort(1, True)
-    st()
+    # st()
     correct = predictions.eq(targets.data.view(-1,1))
 
     # _, pred = outputs.topk(maxk, 1, True, True)
