@@ -89,7 +89,8 @@ class Motion_CNN():
         self.arg = arg
 
     def build_model(self):
-        self.ndata = self.train_loader.__len__() * self.batch_size
+        # self.ndata = self.train_loader.__len__() * self.batch_size
+        self.ndata = len(self.train_loader.dataset.values)
         print ('==> Build model and setup loss and optimizer')
         #build model
         self.model = resnet101(pretrained= True, nb_classes = self.arg.low_dim, channel=self.channel).cuda()
