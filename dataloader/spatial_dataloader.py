@@ -34,7 +34,7 @@ class spatial_dataset(Dataset):
         return transformed_img
 
     def __getitem__(self, idx):
-
+        st()
         if self.mode == 'train':
             video_name, nb_clips = self.keys[idx].split(' ')
             nb_clips = int(nb_clips)
@@ -134,7 +134,7 @@ class spatial_dataloader():
         train_loader = DataLoader(
             dataset=training_set,
             batch_size=self.BATCH_SIZE,
-            shuffle=False,
+            shuffle=True,
             num_workers=self.num_workers)
         return train_loader
 
