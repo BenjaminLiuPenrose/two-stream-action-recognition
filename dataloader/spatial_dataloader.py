@@ -5,6 +5,7 @@ import torchvision.transforms as transforms
 import random
 from split_train_test_video import *
 from skimage import io, color, exposure
+from pdb import set_trace as st
 
 class spatial_dataset(Dataset):
     def __init__(self, dic, root_dir, mode, transform=None):
