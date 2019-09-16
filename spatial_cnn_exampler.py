@@ -69,6 +69,15 @@ def main():
     #Training
     model.run()
 
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    lr = args.lr
+    if epoch >= 80:
+        lr = args.lr * (0.1 ** ((epoch-80) // 40))
+    print(lr)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+
 class Spatial_CNN():
     def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, test_video, arg):
         self.nb_epochs=nb_epochs
@@ -137,7 +146,8 @@ class Spatial_CNN():
             prec1, val_loss = self.validate_1epoch()
             is_best = prec1 > self.best_prec1
             #lr_scheduler
-            self.scheduler.step(val_loss)
+            # self.scheduler.step(val_loss)
+            adjust_learning_rate(self.optimizer, self.epoch)
             # save model
             if is_best:
                 self.best_prec1 = prec1
