@@ -190,7 +190,7 @@ class Spatial_CNN():
             # st()
             loss = self.criterion(output, index_var)
             # loss = self.criterion(feature, target_var)
-
+            st()
             # measure accuracy and record loss
             prec1, prec5 = accuracy(feature.data, label, lemniscate = self.lemniscate, trainloader = self.train_loader, sigma = self.arg.nce_t, topk=(1, 5))
             losses.update(loss.item(), data.size(0))

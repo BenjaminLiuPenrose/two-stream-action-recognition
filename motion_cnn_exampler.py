@@ -176,6 +176,7 @@ class Motion_CNN():
             output = self.lemniscate(feature, index_var)
             # loss = self.criterion(output, target_var)
             loss = self.criterion(output, index_var)
+            st()
 
             # measure accuracy and record loss
             # prec1, prec5 = accuracy(output.data, label, topk=(1, 5))
@@ -253,7 +254,7 @@ class Motion_CNN():
     def frame2_video_level_accuracy(self):
 
         correct = 0
-        video_level_preds = np.zeros((len(self.dic_video_level_preds),101))
+        video_level_preds = np.zeros((len(self.dic_video_level_preds),self.arg.low_dim))
         video_level_labels = np.zeros(len(self.dic_video_level_preds))
         ii=0
         for key in sorted(self.dic_video_level_preds.keys()):
