@@ -28,6 +28,7 @@ def accuracy(outputs, targets, lemniscate = None, trainloader = None, sigma = 0.
     targets = targets.cuda()
     trainLabels = torch.LongTensor(trainloader.dataset.values).cuda()
     trainLabels = torch.sub(trainLabels, 1)
+    st()
     trainFeatures = lemniscate.memory.t()[:,:trainLabels.shape[0]]
     C = trainLabels.max() + 1
     retrieval_one_hot = torch.zeros(K, C).cuda()
