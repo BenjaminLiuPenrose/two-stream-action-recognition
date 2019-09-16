@@ -134,7 +134,7 @@ class spatial_dataloader():
         train_loader = DataLoader(
             dataset=training_set,
             batch_size=self.BATCH_SIZE,
-            shuffle=True,
+            shuffle=False,
             num_workers=self.num_workers)
         return train_loader
 
