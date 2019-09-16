@@ -198,7 +198,7 @@ class Spatial_CNN():
             #     st()
             output = self.lemniscate(feature, index_var)
 
-            st()
+            # st()
             loss = self.criterion(output, index_var)
             # loss = self.criterion(feature, target_var)
             # st()
