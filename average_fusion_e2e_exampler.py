@@ -40,6 +40,14 @@ parser.add_argument('--nce-t', default=0.1, type=float,
                     metavar='T', help='temperature parameter for softmax')
 parser.add_argument('--nce-m', default=0.5, type=float,
                     metavar='M', help='momentum for non-parametric updates')
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    lr = arg.lr
+    if epoch >= 80:
+        lr = arg.lr * (0.1 ** ((epoch-80) // 40))
+    print(lr)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
 
 def main():
     global arg
@@ -124,8 +132,10 @@ def main():
         is_best_motion = prec1_motion > best_prec1_motion
 
         # step scheduler
-        model_spacial.scheduler.step(val_loss_spacial)
-        model_motion.scheduler.step(val_loss_motion)
+        # model_spacial.scheduler.step(val_loss_spacial)
+        # model_motion.scheduler.step(val_loss_motion)
+        adjust_learning_rate(model_spacial.optimizer, epoch)
+        adjust_learning_rate(model_motion.optimizer, epoch)
 
         # store if it is best
         if is_best_spacial:
@@ -171,7 +181,7 @@ def main():
         correct = 0
         ii = 0
         for name in sorted(rgb.keys()):
-            # st()
+            st()
             r = rgb[name]
             o = opf[name]
 
