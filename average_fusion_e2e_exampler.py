@@ -171,7 +171,7 @@ def main():
         correct = 0
         ii = 0
         for name in sorted(rgb.keys()):
-            st()
+            # st()
             r = rgb[name]
             o = opf[name]
 
@@ -186,7 +186,7 @@ def main():
         video_level_labels = torch.from_numpy(video_level_labels).long()
         video_level_preds = torch.from_numpy(video_level_preds).float()
 
-        top1,top5 = accuracy_old(video_level_preds, video_level_labels, topk=(1,5))
+        top1,top5 = accuracy(video_level_preds, video_level_labels, topk=(1,5))
 
         batch_time.update(time.time() - end)
         end = time.time()
