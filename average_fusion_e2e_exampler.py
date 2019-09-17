@@ -181,7 +181,7 @@ def main():
         correct = 0
         ii = 0
         for name in sorted(rgb.keys()):
-            st()
+            # st()
             r = rgb[name]
             o = opf[name]
 
