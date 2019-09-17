@@ -231,8 +231,8 @@ class Motion_CNN():
         progress = tqdm(self.test_loader)
         with torch.no_grad():
             for i, (keys,data,label,index) in enumerate(progress):
-                if i > 10:
-                    break
+                # if i > 10:
+                #     break
                 #data = data.sub_(127.353346189).div_(14.971742063)
                 label = label.cuda(async=True)
                 data_var = Variable(data, volatile=True).cuda(async=True)

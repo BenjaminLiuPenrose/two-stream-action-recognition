@@ -241,8 +241,8 @@ class Spatial_CNN():
         progress = tqdm(self.test_loader)
         with torch.no_grad():
             for i, (keys,data,label,index) in enumerate(progress):
-                # if i > 10:
-                #     break
+                if i > 10:
+                    break
 
                 label = label.cuda(async=True)
                 data_var = Variable(data, volatile=True).cuda(async=True)
