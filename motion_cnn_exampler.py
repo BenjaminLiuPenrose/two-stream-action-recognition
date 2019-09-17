@@ -68,7 +68,8 @@ def main():
                         lr=arg.lr,
                         batch_size=arg.batch_size,
                         channel = 10*2,
-                        test_video=test_video
+                        test_video=test_video,
+                        arg=arg
                         )
     #Training
     model.run()
