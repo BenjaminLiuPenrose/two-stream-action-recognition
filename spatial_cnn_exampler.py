@@ -187,8 +187,8 @@ class Spatial_CNN():
             # compute output
             feature = Variable(torch.zeros(len(data_dict['img1']),self.arg.low_dim).float()).cuda()
             for j in range(len(data_dict)):
-                # if j > 0:
-                #     break
+                if j > 0:
+                    break
                 key = 'img'+str(j)
                 data = data_dict[key]
                 input_var = Variable(data).cuda()
