@@ -76,6 +76,27 @@ def accuracy_old(outputs, targets, lemniscate = None, trainloader = None, sigma 
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
+def accuracy_tmp(outputs, outputs_o, targets, lemniscate = None, trainloader = None, sigma = 0.1, topk=(1,)):
+    """Computes the precision@k for the specified values of k"""
+    maxk = max(topk)
+    batch_size = targets.size(0) * 2
+
+    _, pred = outputs.topk(maxk, 1, True, True)
+    _, pred_o = outputs_o.topk(maxk, 1, True, True)
+    pred = pred.t()
+    pred_o = pred_o.t()
+    # st()
+    correct = pred.eq(targets.view(1, -1).expand_as(pred))
+    correct_o = pred.eq(targets.view(1, -1).expand_as(pred))
+    correct = np.concatenate([correct, correct_o], 1)
+
+    res = []
+    for k in topk:
+        correct_k = correct[:k].view(-1).float().sum(0)
+        # correct_k = correct.narrow(1,0,k).sum()
+        res.append(correct_k.mul_(100.0 / batch_size))
+    return res
+
 class AverageMeter(object):
     """Computes and stores the average and current value"""
     def __init__(self):

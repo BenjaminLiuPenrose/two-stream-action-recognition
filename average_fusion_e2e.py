@@ -159,6 +159,7 @@ def main():
         rgb = model_spacial.dic_video_level_preds
         opf = model_motion.dic_video_level_preds
         video_level_preds = np.zeros((len(rgb.keys()), 101))
+        video_level_preds_o = np.zeros((len(rgb.keys()), 101))
         video_level_labels = np.zeros(len(rgb.keys()))
         correct = 0
         ii = 0
@@ -166,9 +167,13 @@ def main():
             r = rgb[name]
             o = opf[name]
 
+
             label = int(test_video_spacial[name])-1
 
-            video_level_preds[ii,:] = (r+o)
+            video_level_preds[ii, :] = r
+            video_level_preds_o[ii, :] = o
+            # video_level_preds[ii,:] = (r+o)
+            # video_level_preds[ii,:] = np.concatenate([r, o], 0).reshape((2, 101)).T
             video_level_labels[ii] = label
             ii+=1
             if np.argmax(r+o) == (label):
@@ -176,8 +181,9 @@ def main():
 
         video_level_labels = torch.from_numpy(video_level_labels).long()
         video_level_preds = torch.from_numpy(video_level_preds).float()
+        video_level_preds_o = torch.from_numpy(video_level_preds_o).float()
 
-        top1,top5 = accuracy_old(video_level_preds, video_level_labels, topk=(1,5))
+        top1,top5 = accuracy_tmp(video_level_preds, video_level_preds_o, video_level_labels, topk=(1,5))
         batch_time.update(time.time() - end)
         end = time.time()
         top1_acc.update(top1)
