@@ -87,8 +87,9 @@ def accuracy_tmp(outputs, outputs_o, targets, lemniscate = None, trainloader = N
     pred_o = pred_o.t()
     # st()
     correct = pred.eq(targets.view(1, -1).expand_as(pred))
-    correct_o = pred.eq(targets.view(1, -1).expand_as(pred))
-    correct = np.concatenate([correct, correct_o], 1)
+    correct_o = pred_o.eq(targets.view(1, -1).expand_as(pred_o))
+    # correct = np.concatenate([correct, correct_o], 1)
+    correct = torch.cat([correct, correct_o], 1)
 
     res = []
     for k in topk:
