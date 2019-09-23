@@ -50,7 +50,7 @@ def main():
                         path='./data/tvl1_flow/',
                         ucf_list='./UCF_list/',
                         ucf_split='01',
-                        in_channel=10,
+                        in_channel=1,
                         )
 
     train_loader,test_loader, test_video = data_loader.run()
@@ -67,7 +67,7 @@ def main():
                         nb_epochs=arg.epochs,
                         lr=arg.lr,
                         batch_size=arg.batch_size,
-                        channel = 10*2,
+                        channel = 1*2,
                         test_video=test_video,
                         arg=arg
                         )
