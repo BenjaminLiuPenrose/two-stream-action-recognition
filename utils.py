@@ -93,7 +93,7 @@ def accuracy_tmp(outputs, outputs_o, targets, lemniscate = None, trainloader = N
 
     res = []
     for k in topk:
-        st()
+        # st()
         correct_k = correct[:k].view(-1).float().sum(0)
         # correct_k = correct.narrow(1,0,k).sum()
         res.append(correct_k.mul_(100.0 / batch_size))
