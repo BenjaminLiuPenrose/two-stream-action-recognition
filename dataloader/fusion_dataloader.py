@@ -29,7 +29,6 @@ class fusion_dataset(Dataset):
         self.transform_spatial=transform_spatial
         ### args from motion
         self.root_dir_motion = root_dir_motion
-        self.transform = transform
         self.in_channel = in_channel
         self.img_rows = 224
         self.img_cols = 224
@@ -201,12 +200,17 @@ class fusion_dataloader():
 
 
     def train(self):
-        training_set = fusion_dataset(dic_spatial=self.dic_training_spatial, dic_motion=self.dic_training_motion, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='train', transform = transforms.Compose([
+        training_set = fusion_dataset(dic_spatial=self.dic_training_spatial, dic_motion=self.dic_training_motion, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='train', transform_spatial = transforms.Compose([
                 transforms.RandomCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
-                ]))
+                ]),
+            transform_motion = transforms.Compose([
+            transforms.Scale([224,224]),
+            transforms.ToTensor(),
+            ])
+        )
         print '==> Training data :',len(training_set),'frames/videos'
         print training_set[1][0]['img1'].size()
 
