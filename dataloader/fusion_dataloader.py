@@ -123,6 +123,7 @@ class fusion_dataloader():
         self.data_path_spatial=path_spatial
         ### args for motion dataloader
         self.data_path_motion =path_motion
+        self.in_channel = in_channel
 
     def load_frame_count(self):
         #print '==> Loading frame number of each video'
