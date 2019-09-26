@@ -175,8 +175,8 @@ class Fusion_CNN():
             # compute output for spatial cnn
             output_motion = self.motion_model(data_var)
             input_next = torch.cat((output_spatial, output_motion), 1)
-            output = self.concat_model(input_next)
             st()
+            output = self.concat_model(input_next)
 
             # compute output
             loss = self.criterion(output, target_var)
