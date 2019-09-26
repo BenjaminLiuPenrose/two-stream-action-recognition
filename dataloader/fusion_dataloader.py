@@ -224,7 +224,7 @@ class fusion_dataloader():
         return train_loader
 
     def validate(self):
-        validation_set = fusion_dataset(dic_spatial=self.dic_training_spatial, dic_motion=self.dic_training_motion, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='val', transform_spatial = transforms.Compose([
+        validation_set = fusion_dataset(dic_spatial=self.dic_testing, dic_motion=self.dic_test_idx, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='val', transform_spatial = transforms.Compose([
                 transforms.Scale([224,224]),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
