@@ -236,7 +236,7 @@ class fusion_dataloader():
         )
 
         print '==> Validation data :',len(validation_set),'frames'
-        print validation_set[1][1].size()
+        print validation_set[1][2].size()
 
         val_loader = DataLoader(
             dataset=validation_set,
