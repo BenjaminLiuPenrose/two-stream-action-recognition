@@ -82,6 +82,7 @@ def adjust_learning_rate(optimizer, epoch):
 
 class MLP(nn.Module):
     def __init__(self):
+        super(MLP, self).__init__()
         nb_classes = 101
         H = 256
         D_in = 512
