@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
 class fusion_dataset(Dataset):
-    def __init__(self, dic_spatial, dic_motion, in_channel, root_dir_spatial,root_dir_motion, mode, transform=None):
+    def __init__(self, dic_spatial, dic_motion, in_channel, root_dir_spatial,root_dir_motion, mode, transform_spatial=None, transform_motion=None):
         ### args from spatial
         self.keys_spatial = dic_spatial.keys()
         self.values_spatial=dic_spatial.values()
@@ -26,12 +26,14 @@ class fusion_dataset(Dataset):
         self.values_motion=dic_motion.values()
         self.root_dir_spatial = root_dir_spatial
         self.mode =mode ### train or validation
+        self.transform_spatial=transform_spatial
         ### args from motion
         self.root_dir_motion = root_dir_motion
         self.transform = transform
         self.in_channel = in_channel
         self.img_rows = 224
         self.img_cols = 224
+        self.transform_motion = transform_motion
 
 
     def __len__(self):
@@ -56,8 +58,8 @@ class fusion_dataset(Dataset):
             imgH=(Image.open(h_image))
             imgV=(Image.open(v_image))
 
-            H = self.transform(imgH)
-            V = self.transform(imgV)
+            H = self.transform_motion(imgH)
+            V = self.transform_motion(imgV)
 
 
             flow[2*(j-1),:,:] = H
@@ -76,7 +78,7 @@ class fusion_dataset(Dataset):
             path = self.root_dir_spatial + 'v_'+video_name
 
         img = Image.open(path + "/frame%06d" % index +'.jpg')
-        transformed_img = self.transform(img)
+        transformed_img = self.transform_spatial(img)
         img.close()
 
         return transformed_img
@@ -218,11 +220,16 @@ class fusion_dataloader():
         return train_loader
 
     def validate(self):
-        validation_set = fusion_dataset(dic_spatial=self.dic_training_spatial, dic_motion=self.dic_training_motion, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='val', transform = transforms.Compose([
+        validation_set = fusion_dataset(dic_spatial=self.dic_training_spatial, dic_motion=self.dic_training_motion, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='val', transform_spatial = transforms.Compose([
                 transforms.Scale([224,224]),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
-                ]))
+                ]),
+            transform_motion = transforms.Compose([
+            transforms.Scale([224,224]),
+            transforms.ToTensor(),
+            ])
+        )
 
         print '==> Validation data :',len(validation_set),'frames'
         print validation_set[1][1].size()
