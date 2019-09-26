@@ -90,8 +90,8 @@ class Fusion_CNN():
 
     def build_model(self):
         print ('==> Build model and setup loss and optimizer')
-        self.spatial_model = resnet18(pretrained= True, channel=3, end2end = self.end2end).cuda()
-        self.motion_model = resnet101(pretrained= True, channel=self.channel, end2end = self.end2end).cuda()
+        self.spatial_model = resnet18(pretrained= True, channel=3, end2end = self.end2end).cuda() ### all 101 or all 18
+        self.motion_model = resnet18(pretrained= True, channel=self.channel, end2end = self.end2end).cuda()
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.optimizer = torch.optim.SGD(list(self.spatial_model.parameters())+list(self.motion_model.parameters()), self.lr, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience=1,verbose=True)
@@ -154,7 +154,7 @@ class Fusion_CNN():
                 st()
                 output_spatial += self.spatial_model(data_key_var)
             # compute output for spatial cnn
-            output_motion = self.motion_cnn(data_var)
+            output_motion = self.motion_model(data_var)
             st()
 
 if __name__=='__main__':
