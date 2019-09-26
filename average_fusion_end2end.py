@@ -71,7 +71,14 @@ def main():
     #Training
     model.run()
 
-
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    lr = arg.lr
+    if epoch >= 80:
+        lr = arg.lr * (0.1 ** ((epoch-80) // 40))
+    print(lr)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
 
 class Fusion_CNN():
     def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video, end2end = True):
@@ -92,9 +99,21 @@ class Fusion_CNN():
         print ('==> Build model and setup loss and optimizer')
         self.spatial_model = resnet18(pretrained= True, channel=3, end2end = self.end2end).cuda() ### all 101 or all 18
         self.motion_model = resnet18(pretrained= True, channel=self.channel, end2end = self.end2end).cuda()
+
+        D_in = 512 + 512
+        H = 256
+        D_out = 101
+        self.concat_model = torch.nn.Sequential(
+            torch.nn.AvgPool2d(7)
+            torch.nn.Linear(D_in, H),
+            torch.nn.ReLU(),
+            torch.nn.Linear(H, D_out),
+        ).cuda()
+
         self.criterion = nn.CrossEntropyLoss().cuda()
-        self.optimizer = torch.optim.SGD(list(self.spatial_model.parameters())+list(self.motion_model.parameters()), self.lr, momentum=0.9)
+        self.optimizer = torch.optim.SGD(list(self.spatial_model.parameters())+list(self.motion_model.parameters())+list(self.concat_model.parameters()), self.lr, momentum=0.9)
         self.scheduler = ReduceLROnPlateau(self.optimizer, 'min', patience=1,verbose=True)
+
 
     def resume_and_evaluate(self):
         pass
@@ -108,7 +127,8 @@ class Fusion_CNN():
             prec1, val_loss = self.validate_1epoch()
             is_best = prec1 > self.best_prec1
             #lr_scheduler
-            self.scheduler.step(val_loss)
+            # self.scheduler.step(val_loss)
+            adjust_learning_rate(self.optimizer, self.epoch)
             # save model
             if is_best:
                 self.best_prec1 = prec1
@@ -144,18 +164,58 @@ class Fusion_CNN():
             data_var = Variable(data_motion).cuda()
             label_var = Variable(label).cuda()
             # compute output for spatial cnn
-            output_spatial = Variable(torch.zeros(len(data_spatial['img1']),101).float()).cuda()
+            output_spatial = Variable(torch.zeros(len(data_spatial['img1']),512, 7, 7).float()).cuda()
             for j in range(len(data_spatial)):
                 if j > 0:
                     break
                 key = 'img'+str(j)
                 data_key = data_spatial[key]
                 data_key_var = Variable(data_key).cuda()
-                st()
                 output_spatial += self.spatial_model(data_key_var)
             # compute output for spatial cnn
             output_motion = self.motion_model(data_var)
+            input_next = torch.cat((output_spatial, output_motion), 1)
+            output = self.concat_model(input_next)
             st()
+
+            # compute output
+            loss = self.criterion(output, target_var)
+
+            # measure accuracy and record loss
+            prec1, prec5 = accuracy_old(output.data, label, topk=(1, 5))
+            losses.update(loss.data.item(), data.size(0))
+            top1.update(prec1.item(), data.size(0))
+            top5.update(prec5.item(), data.size(0))
+
+            # compute gradient and do SGD step
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+
+            # measure elapsed time
+            batch_time.update(time.time() - end)
+            end = time.time()
+
+        info = {'Epoch':[self.epoch],
+                'Batch Time':[round(batch_time.avg,3)],
+                'Data Time':[round(data_time.avg,3)],
+                'Loss':[round(losses.avg,5)],
+                'Prec@1':[round(top1.avg,4)],
+                'Prec@5':[round(top5.avg,4)],
+                'lr': self.optimizer.param_groups[0]['lr']
+                }
+        record_info(info, 'record/fusion_train_supervised.csv','train')
+
+
+    def validate_1epoch(self):
+        print('FUSIONCNN==> Epoch:[{0}/{1}][validation stage]'.format(self.epoch, self.nb_epochs))
+
+        batch_time = AverageMeter()
+        losses = AverageMeter()
+        top1 = AverageMeter()
+        top5 = AverageMeter()
+
+
 
 if __name__=='__main__':
     main()
