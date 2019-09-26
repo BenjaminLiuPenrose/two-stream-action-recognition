@@ -282,7 +282,7 @@ class Fusion_CNN():
                 output_spatial += self.model(data_key_var)
             # compute output for spatial cnn
             output_motion = self.model(data_var)
-
+            st()
 
 if __name__=='__main__':
     main()
