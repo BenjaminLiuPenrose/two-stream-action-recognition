@@ -44,7 +44,7 @@ def main():
     data_loader = dataloader.fusion_dataloader(
                         BATCH_SIZE=arg.batch_size,
                         num_workers=8,
-                        path_spatial='./data/jpegs_256/'
+                        path_spatial='./data/jpegs_256/',
                         path_motion='./data/tvl1_flow/',
                         ucf_list='./UCF_list/',
                         ucf_split='01',
