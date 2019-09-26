@@ -132,7 +132,7 @@ class Fusion_CNN():
         self.spatial_model.train()
         self.motion_model.train()
         end = time.time()
-        progress = rqdm(self.train_loader)
+        progress = tqdm(self.train_loader)
         for i, (data_dict, keys, data, label, index) in enumerate(progress):
             # measure data loading time
             data_time.update(time.time() - end)
