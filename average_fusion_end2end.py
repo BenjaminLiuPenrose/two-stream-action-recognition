@@ -151,9 +151,10 @@ class Fusion_CNN():
                 key = 'img'+str(j)
                 data_key = data_spatial[key]
                 data_key_var = Variable(data_key).cuda()
+                st()
                 output_spatial += self.spatial_model(data_key_var)
             # compute output for spatial cnn
-            output_motion = self.motion_model(data_var)
+            output_motion = self.motion_cnn(data_var)
             st()
 
 if __name__=='__main__':
