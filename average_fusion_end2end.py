@@ -104,7 +104,7 @@ class Fusion_CNN():
         H = 256
         D_out = 101
         self.concat_model = torch.nn.Sequential(
-            torch.nn.AvgPool2d(7)
+            torch.nn.AvgPool2d(7),
             torch.nn.Linear(D_in, H),
             torch.nn.ReLU(),
             torch.nn.Linear(H, D_out),
