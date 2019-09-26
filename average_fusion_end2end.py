@@ -41,10 +41,11 @@ def main():
     print arg
 
     #Prepare DataLoader
-    data_loader = dataloader.Motion_DataLoader(
+    data_loader = dataloader.fusion_dataloader(
                         BATCH_SIZE=arg.batch_size,
                         num_workers=8,
-                        path='./data/tvl1_flow/',
+                        path_spatial='./data/jpegs_256/'
+                        path_motion='./data/tvl1_flow/',
                         ucf_list='./UCF_list/',
                         ucf_split='01',
                         in_channel=10,
@@ -133,21 +134,22 @@ class Fusion_CNN():
         self.motion_model.train()
         end = time.time()
         progress = tqdm(self.train_loader)
-        for i, (data_dict, keys, data, label, index) in enumerate(progress):
+        ### data_dict from spatial, data from motion
+        for i, (data_spatial, data_motion, label, index) in enumerate(progress):
             # measure data loading time
             data_time.update(time.time() - end)
 
             label = label.cuda()
             index = index.cuda()
-            data_var = Variable(data).cuda()
+            data_var = Variable(data_motion).cuda()
             label_var = Variable(label).cuda()
             # compute output for spatial cnn
-            output_spatial = Variable(torch.zeros(len(data_dict['img1']),101).float()).cuda()
-            for j in range(len(data_dict)):
+            output_spatial = Variable(torch.zeros(len(data_spatial['img1']),101).float()).cuda()
+            for j in range(len(data_spatial)):
                 if j > 0:
                     break
                 key = 'img'+str(j)
-                data_key = data_dict[key]
+                data_key = data_spatial[key]
                 data_key_var = Variable(data_key).cuda()
                 output_spatial += self.model(data_key_var)
             # compute output for spatial cnn
