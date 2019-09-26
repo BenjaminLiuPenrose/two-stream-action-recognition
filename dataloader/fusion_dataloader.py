@@ -8,10 +8,12 @@ from skimage import io, color, exposure
 from pdb import set_trace as st
 
 class fusion_dataset(Dataset):
-    def __init__(self, dic, in_channel, root_dir_spatial,root_dir_motion, mode, transform=None):
+    def __init__(self, dic_spatial, dic_motion, in_channel, root_dir_spatial,root_dir_motion, mode, transform=None):
         ### args from spatial
-        self.keys = dic.keys()
-        self.values=dic.values()
+        self.keys_spatial = dic_spatial.keys()
+        self.values_spatial=dic_spatial.values()
+        self.keys_motion=dic_motion.keys()
+        self.values_motion=dic_motion.values()
         self.root_dir_spatial = root_dir_spatial
         self.mode =mode ### train or validation
         ### args from motion
@@ -23,7 +25,7 @@ class fusion_dataset(Dataset):
 
 
     def __len__(self):
-        return len(self.keys)
+        return len(self.keys_spatial)
 
     def stackopf(self):
         name = 'v_'+self.video
@@ -72,25 +74,25 @@ class fusion_dataset(Dataset):
     def __getitem__(self, idx):
         if self.mode == 'train':
             ### prepare for train spatial dataloader
-            video_name, nb_clips = self.keys[idx].split(' ')
+            video_name, nb_clips = self.keys_spatial[idx].split(' ')
             nb_clips = int(nb_clips)
             clips = []
             clips.append(random.randint(1, nb_clips/3))
             clips.append(random.randint(nb_clips/3, nb_clips*2/3))
             clips.append(random.randint(nb_clips*2/3, nb_clips+1))
             ### prepare for train motion dataloader
-            self.video, nb_clips = self.keys[idx].split('-')
+            self.video, nb_clips = self.keys_motion[idx].split(' ')
             self.clips_idx = random.randint(1,int(nb_clips))
         elif self.mode == 'val':
             ### prepare for vol spatial dataloader
-            video_name, index = self.keys[idx].split(' ')
+            video_name, index = self.keys_spatial[idx].split(' ')
             index =abs(int(index))
             ### prepare for val motion dataloader
-            self.video,self.clips_idx = self.keys[idx].split('-')
+            self.video,self.clips_idx = self.keys_motion[idx].split(' ')
         else:
             raise ValueError('There are only train and val mode')
 
-        label = self.values[idx]
+        label = self.values_spatial[idx] ### values spatial is the same as values_motion
         label = int(label)-1
         ### data for motion
         data_motion = self.stackopf()
@@ -142,6 +144,7 @@ class fusion_dataloader():
         self.load_frame_count()
         self.get_training_dic()
         self.val_sample20()
+        self.val_sample19()
         train_loader = self.train()
         val_loader = self.validate()
 
@@ -149,12 +152,17 @@ class fusion_dataloader():
 
     def get_training_dic(self):
         #print '==> Generate frame numbers of each training video'
-        self.dic_training={}
+        self.dic_training_spatial={}
+        self.dic_training_motion = {}
         for video in self.train_video:
             #print videoname
             nb_frame = self.frame_count[video]-10+1
-            key = video+' '+ str(nb_frame)
-            self.dic_training[key] = self.train_video[video]
+            nb_clips = self.frame_count[video]-10+1
+            key_spatial = video+' '+ str(nb_frame)
+            key_motion = video +' ' + str(nb_clips)
+            self.dic_training_spatial[key_spatial] = self.train_video[video]
+            self.dic_training_motion[key_motion] = self.train_video[video]
+
 
     def val_sample20(self):
         print '==> sampling testing frames'
@@ -176,12 +184,12 @@ class fusion_dataloader():
             sampling_interval = int((self.frame_count[video]-10+1)/19)
             for index in range(19):
                 clip_idx = index*sampling_interval
-                key = video + '-' + str(clip_idx+1)
+                key = video + ' ' + str(clip_idx+1)
                 self.dic_test_idx[key] = self.test_video[video]
 
 
     def train(self):
-        training_set = fusion_dataset(dic=self.dic_training, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='train', transform = transforms.Compose([
+        training_set = fusion_dataset(dic_spatial=self.dic_training_spatial, dic_motion=self.dic_training_motion, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='train', transform = transforms.Compose([
                 transforms.RandomCrop(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
@@ -200,7 +208,7 @@ class fusion_dataloader():
         return train_loader
 
     def validate(self):
-        validation_set = fusion_dataset(dic=self.dic_testing, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='val', transform = transforms.Compose([
+        validation_set = fusion_dataset(dic_spatial=self.dic_training_spatial, dic_motion=self.dic_training_motion, in_channel=self.in_channel, root_dir_spatial=self.data_path_spatial, root_dir_motion=self.data_path_motion, mode='val', transform = transforms.Compose([
                 transforms.Scale([224,224]),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
