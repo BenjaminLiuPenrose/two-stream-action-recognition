@@ -102,8 +102,9 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, nb_classes=101, channel=20):
+    def __init__(self, block, layers, nb_classes=101, channel=20, end2end = False):
         self.inplanes = 64
+        self.end2end = end2end
         super(ResNet, self).__init__()
         self.conv1_custom = nn.Conv2d(channel, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
@@ -151,10 +152,12 @@ class ResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
-
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
-        out = self.fc_custom(x)
+        if not self.end2end:
+            x = self.avgpool(x)
+            x = x.view(x.size(0), -1)
+            out = self.fc_custom(x)
+        else:
+            out = x
         return out
 
 

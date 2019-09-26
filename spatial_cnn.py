@@ -62,7 +62,7 @@ def main():
     model.run()
 
 class Spatial_CNN():
-    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, test_video):
+    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, test_video, end2end = False):
         self.nb_epochs=nb_epochs
         self.lr=lr
         self.batch_size=batch_size
@@ -73,11 +73,12 @@ class Spatial_CNN():
         self.test_loader=test_loader
         self.best_prec1=0
         self.test_video=test_video
+        self.end2end = end2end
 
     def build_model(self):
         print ('==> Build model and setup loss and optimizer')
         #build model
-        self.model = resnet18(pretrained= True, channel=3).cuda()
+        self.model = resnet18(pretrained= True, channel=3, end2end = self.end2end).cuda()
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.optimizer = torch.optim.SGD(self.model.parameters(), self.lr, momentum=0.9)
@@ -158,6 +159,7 @@ class Spatial_CNN():
                 output += self.model(input_var)
             # if i > 100:
             #     st()
+
             loss = self.criterion(output, target_var)
 
             # measure accuracy and record loss
@@ -185,6 +187,7 @@ class Spatial_CNN():
                 'lr': self.optimizer.param_groups[0]['lr']
                 }
         record_info(info, 'record/spatial/rgb_train_x.csv','train')
+        return
 
     def validate_1epoch(self):
         print('SPCNN==> Epoch:[{0}/{1}][validation stage]'.format(self.epoch, self.nb_epochs))

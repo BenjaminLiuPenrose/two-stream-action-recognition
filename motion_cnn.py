@@ -67,7 +67,7 @@ def main():
     model.run()
 
 class Motion_CNN():
-    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video):
+    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video, end2end = False):
         self.nb_epochs=nb_epochs
         self.lr=lr
         self.batch_size=batch_size
@@ -79,11 +79,12 @@ class Motion_CNN():
         self.best_prec1=0
         self.channel=channel
         self.test_video=test_video
+        self.end2end = end2end
 
     def build_model(self):
         print ('==> Build model and setup loss and optimizer')
         #build model
-        self.model = resnet101(pretrained= True, channel=self.channel).cuda()
+        self.model = resnet101(pretrained= True, channel=self.channel, end2end = self.end2end).cuda()
         #print self.model
         #Loss function and optimizer
         self.criterion = nn.CrossEntropyLoss().cuda()

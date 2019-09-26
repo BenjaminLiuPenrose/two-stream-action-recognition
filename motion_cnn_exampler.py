@@ -67,7 +67,7 @@ def main():
                         nb_epochs=arg.epochs,
                         lr=arg.lr,
                         batch_size=arg.batch_size,
-                        channel = 1*2,
+                        channel = 1*2, ### modify
                         test_video=test_video,
                         arg=arg
                         )
