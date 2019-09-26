@@ -81,7 +81,7 @@ def adjust_learning_rate(optimizer, epoch):
         param_group['lr'] = lr
 
 class MLP(nn.Module):
-    def __init__():
+    def __init__(self):
         nb_classes = 101
         H = 256
         D_in = 512
