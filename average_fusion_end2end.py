@@ -80,6 +80,24 @@ def adjust_learning_rate(optimizer, epoch):
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
+class MLP(nn.Module):
+    def __init__():
+        nb_classes = 101
+        H = 256
+        D_in = 512
+        self.avgpool = nn.AvgPool2d(7)
+        self.fc_custom = nn.Linear(D_in, H)
+        self.relu = nn.ReLU()
+        self.fc_custom_2 = nn.Linear(H, nb_classes)
+
+    def forward(self, x):
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        x = self.fc_custom(x)
+        x = self.relu(x)
+        x = self.fc_custom_2(x)
+        return x
+
 class Fusion_CNN():
     def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video, end2end = True):
         self.nb_epochs=nb_epochs
@@ -103,12 +121,7 @@ class Fusion_CNN():
         D_in = 512 + 512
         H = 256
         D_out = 101
-        self.concat_model = torch.nn.Sequential(
-            torch.nn.AvgPool2d(7),
-            torch.nn.Linear(D_in, H),
-            torch.nn.ReLU(),
-            torch.nn.Linear(H, D_out),
-        ).cuda()
+        self.concat_model = MLP().cuda()
 
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.optimizer = torch.optim.SGD(list(self.spatial_model.parameters())+list(self.motion_model.parameters())+list(self.concat_model.parameters()), self.lr, momentum=0.9)
