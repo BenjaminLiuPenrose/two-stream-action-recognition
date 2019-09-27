@@ -189,11 +189,11 @@ class Fusion_CNN():
             # compute output for spatial cnn
             output_motion = self.motion_model(data_var)
             input_next = torch.cat((output_spatial, output_motion), 1)
-            st()
+            # st()
             output = self.concat_model(input_next)
 
             # compute output
-            loss = self.criterion(output, target_var)
+            loss = self.criterion(output, label_var)
 
             # measure accuracy and record loss
             prec1, prec5 = accuracy_old(output.data, label, topk=(1, 5))
