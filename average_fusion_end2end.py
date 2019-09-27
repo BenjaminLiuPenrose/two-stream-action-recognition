@@ -137,7 +137,7 @@ class Fusion_CNN():
         self.resume_and_evaluate()
         cudnn.benchmark = True
         for self.epoch in range(self.start_epoch, self.nb_epochs):
-            self.train_1epoch()
+            # self.train_1epoch()
             prec1, val_loss = self.validate_1epoch()
             is_best = prec1 > self.best_prec1
             #lr_scheduler
@@ -228,20 +228,79 @@ class Fusion_CNN():
         losses = AverageMeter()
         top1 = AverageMeter()
         top5 = AverageMeter()
+        # switch to evaluate mode
+        self.motion_model.eval()
+        self.spatial_model.eval()
+        self.dic_video_level_preds = {}
+        end = time.time()
+        progress = tqdm(self.test_loader)
+        with torch.no_grad():
+            for i, (keys_spatial, keys_motion, data_spatial, data_motion, label, index) in enumerate(progress):
+                label = label.cuda()
+                index = index.cuda()
+                data_motion_var = Variable(data_motion).cuda()
+                data_spatial_var = Variable(data_spatial).cuda()
+                label_var = Variable(label).cuda()
 
+                # compute output
+                output_spatial = self.spatial_model(data_spatial_var)
+                output_motion = self.motion_model(data_motion_var)
+                input_next = torch.cat((output_spatial, output_motion), 1)
+                output = self.concat_model(input_next)
 
+                # measure elapsed time
+                batch_time.update(time.time() - end)
+                end = time.time()
+                #Calculate video level prediction
+                preds = output.data.cpu().numpy()
+
+                nb_data = preds.shape[0]
+                for j in range(nb_data):
+                    videoName = keys_motion[j].split('/',1)[0]
+                    if videoName not in self.dic_video_level_preds.keys():
+                        self.dic_video_level_preds[videoName] = preds[j,:]
+                    else:
+                        self.dic_video_level_preds[videoName] += preds[j,:]
+
+            video_top1, video_top5, video_loss = self.frame2_video_level_accuracy()
+
+            info = {'Epoch':[self.epoch],
+                    'Batch Time':[round(batch_time.avg,3)],
+                    'Loss':[round(video_loss,5)],
+                    'Prec@1':[round(video_top1,3)],
+                    'Prec@5':[round(video_top5,3)]}
+            record_info(info, 'record/rgb_test_supervised.csv','test')
+        return video_top1, video_loss
+
+    def frame2_video_level_accuracy(self):
+        correct = 0
+        video_level_preds = np.zeros((len(self.dic_video_level_preds),101))
+        video_level_labels = np.zeros(len(self.dic_video_level_preds))
+        ii=0
+        for name in sorted(self.dic_video_level_preds.keys()):
+
+            preds = self.dic_video_level_preds[name]
+            label = int(self.test_video[name])-1
+
+            video_level_preds[ii,:] = preds
+            video_level_labels[ii] = label
+            ii+=1
+            if np.argmax(preds) == (label):
+                correct+=1
+
+        #top1 top5
+        video_level_labels = torch.from_numpy(video_level_labels).long()
+        video_level_preds = torch.from_numpy(video_level_preds).float()
+
+        top1,top5 = accuracy_old(video_level_preds, video_level_labels, topk=(1,5))
+        loss = self.criterion(Variable(video_level_preds).cuda(), Variable(video_level_labels).cuda())
+
+        top1 = float(top1.numpy())
+        top5 = float(top5.numpy())
+
+        #print(' * Video level Prec@1 {top1:.3f}, Video level Prec@5 {top5:.3f}'.format(top1=top1, top5=top5))
+        return top1,top5,loss.data.cpu().numpy()
 
 if __name__=='__main__':
     main()
 
-
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    main()
