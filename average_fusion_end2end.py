@@ -197,9 +197,9 @@ class Fusion_CNN():
 
             # measure accuracy and record loss
             prec1, prec5 = accuracy_old(output.data, label, topk=(1, 5))
-            losses.update(loss.data.item(), data.size(0))
-            top1.update(prec1.item(), data.size(0))
-            top5.update(prec5.item(), data.size(0))
+            losses.update(loss.data.item(), data_motion.size(0))
+            top1.update(prec1.item(), data_motion.size(0))
+            top5.update(prec5.item(), data_motion.size(0))
 
             # compute gradient and do SGD step
             self.optimizer.zero_grad()
