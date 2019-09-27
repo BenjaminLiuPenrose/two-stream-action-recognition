@@ -152,7 +152,7 @@ class Fusion_CNN():
 
             save_checkpoint({
                 'epoch': self.epoch,
-                'state_dict': self.model.state_dict(),
+                'state_dict': self.spatial_model.state_dict(),
                 'best_prec1': self.best_prec1,
                 'optimizer' : self.optimizer.state_dict()
             },is_best,'record/checkpoint.pth.tar','record/model_best.pth.tar')
@@ -210,7 +210,7 @@ class Fusion_CNN():
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
-            print("time for this epoch is ", end - bg)
+            # print("time for this epoch is ", end - bg)
 
         info = {'Epoch':[self.epoch],
                 'Batch Time':[round(batch_time.avg,3)],
