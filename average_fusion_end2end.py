@@ -137,7 +137,7 @@ class Fusion_CNN():
         self.resume_and_evaluate()
         cudnn.benchmark = True
         for self.epoch in range(self.start_epoch, self.nb_epochs):
-            # self.train_1epoch()
+            self.train_1epoch()
             prec1, val_loss = self.validate_1epoch()
             is_best = prec1 > self.best_prec1
             #lr_scheduler
@@ -170,6 +170,7 @@ class Fusion_CNN():
         progress = tqdm(self.train_loader)
         ### data_dict from spatial, data from motion
         for i, (data_spatial, data_motion, label, index) in enumerate(progress):
+            bg = time.time()
             # measure data loading time
             data_time.update(time.time() - end)
 
@@ -209,6 +210,7 @@ class Fusion_CNN():
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
+            print("time for this epoch is ", end - bg)
 
         info = {'Epoch':[self.epoch],
                 'Batch Time':[round(batch_time.avg,3)],
@@ -236,6 +238,8 @@ class Fusion_CNN():
         progress = tqdm(self.test_loader)
         with torch.no_grad():
             for i, (keys_spatial, keys_motion, data_spatial, data_motion, label, index) in enumerate(progress):
+                if i > 3:
+                    break ### skip validation
                 label = label.cuda()
                 index = index.cuda()
                 data_motion_var = Variable(data_motion).cuda()
