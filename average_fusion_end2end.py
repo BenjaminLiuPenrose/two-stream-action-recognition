@@ -85,7 +85,7 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         nb_classes = 101
         H = 256
-        D_in = 512
+        D_in = 512 * 2
         self.avgpool = nn.AvgPool2d(7)
         self.fc_custom = nn.Linear(D_in, H)
         self.relu = nn.ReLU()
