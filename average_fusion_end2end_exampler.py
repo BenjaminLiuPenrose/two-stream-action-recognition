@@ -74,7 +74,8 @@ def main():
                         lr=arg.lr,
                         batch_size=arg.batch_size,
                         channel = 10*2,
-                        test_video=test_video
+                        test_video=test_video,
+                        arg = arg,
                         )
     #Training
     model.run()
@@ -108,7 +109,7 @@ class MLP(nn.Module):
         return x
 
 class Fusion_CNN():
-    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video, end2end = True):
+    def __init__(self, nb_epochs, lr, batch_size, resume, start_epoch, evaluate, train_loader, test_loader, channel,test_video, arg, end2end = True):
         self.nb_epochs=nb_epochs
         self.lr=lr
         self.batch_size=batch_size
@@ -121,6 +122,7 @@ class Fusion_CNN():
         self.channel=channel
         self.test_video=test_video
         self.end2end = end2end
+        self.arg = arg
 
     def build_model(self):
         print ('==> Build model and setup loss and optimizer')
