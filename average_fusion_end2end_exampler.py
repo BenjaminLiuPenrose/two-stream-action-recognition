@@ -91,8 +91,8 @@ def adjust_learning_rate(optimizer, epoch):
 class MLP(nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
-        nb_classes = args.low_dim
-        H = 256
+        nb_classes = arg.low_dim
+        H = 512
         D_in = 512 * 2
         self.avgpool = nn.AvgPool2d(7)
         self.fc_custom = nn.Linear(D_in, H)
