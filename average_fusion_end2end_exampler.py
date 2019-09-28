@@ -125,6 +125,7 @@ class Fusion_CNN():
         self.arg = arg
 
     def build_model(self):
+        self.ndata = len(self.train_loader.dataset.values)
         print ('==> Build model and setup loss and optimizer')
         self.spatial_model = resnet18(pretrained= True, channel=3, end2end = self.end2end).cuda() ### all 101 or all 18
         self.motion_model = resnet18(pretrained= True, channel=self.channel, end2end = self.end2end).cuda()
