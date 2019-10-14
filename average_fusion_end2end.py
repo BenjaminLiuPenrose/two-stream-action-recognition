@@ -119,9 +119,6 @@ class Fusion_CNN():
         self.spatial_model = resnet18(pretrained= True, channel=3, end2end = self.end2end).cuda() ### all 101 or all 18
         self.motion_model = resnet18(pretrained= True, channel=self.channel, end2end = self.end2end).cuda()
 
-        D_in = 512 + 512
-        H = 256
-        D_out = 101
         self.concat_model = MLP().cuda()
 
         self.criterion = nn.CrossEntropyLoss().cuda()

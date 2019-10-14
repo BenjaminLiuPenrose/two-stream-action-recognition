@@ -93,7 +93,7 @@ class MLP(nn.Module):
     def __init__(self):
         super(MLP, self).__init__()
         nb_classes = arg.low_dim
-        H = 512
+        H = 256
         D_in = 512 * 2
         self.avgpool = nn.AvgPool2d(7)
         self.fc_custom = nn.Linear(D_in, H)
@@ -138,6 +138,7 @@ class Fusion_CNN():
                                 self.ndata,
                                 self.arg.nce_t,
                                 self.arg.nce_m,
+                                concat = 2
                             )
 
 
@@ -162,7 +163,7 @@ class Fusion_CNN():
             # save model
             if is_best:
                 self.best_prec1 = prec1
-                with open('record/fusion_video_preds.pickle','wb') as f:
+                with open('record/fusion_video_preds_u.pickle','wb') as f:
                     pickle.dump(self.dic_video_level_preds,f)
                 f.close()
 
@@ -171,7 +172,7 @@ class Fusion_CNN():
                 'state_dict': self.spatial_model.state_dict(),
                 'best_prec1': self.best_prec1,
                 'optimizer' : self.optimizer.state_dict()
-            },is_best,'record/checkpoint.pth.tar','record/model_best.pth.tar')
+            },is_best,'record/checkpoint_u.pth.tar','record/model_best.pth.tar')
 
     def train_1epoch(self):
         print('FUSION CNN==> Epoch:[{0}/{1}][training stage]'.format(self.epoch, self.nb_epochs))
@@ -194,6 +195,7 @@ class Fusion_CNN():
             index = index.cuda()
             data_var = Variable(data_motion).cuda()
             label_var = Variable(label).cuda()
+            index_var = Variable(index).cuda()
             # compute output for spatial cnn
             output_spatial = Variable(torch.zeros(len(data_spatial['img1']),512, 7, 7).float()).cuda()
             for j in range(len(data_spatial)):
@@ -207,10 +209,13 @@ class Fusion_CNN():
             output_motion = self.motion_model(data_var)
             input_next = torch.cat((output_spatial, output_motion), 1)
             # st()
-            output = self.concat_model(input_next)
+            feature = self.concat_model(input_next)
+            output = self.lemniscate(feature, index)
 
             # compute output
-            loss = self.criterion(output, label_var)
+            # loss = self.criterion(output, label_var)
+            loss = self.criterion(output, index_var)
+
 
             # measure accuracy and record loss
             ### add
@@ -238,7 +243,7 @@ class Fusion_CNN():
                 'Prec@5':[round(top5.avg,4)],
                 'lr': self.optimizer.param_groups[0]['lr']
                 }
-        record_info(info, 'record/fusion_train_supervised.csv','train')
+        record_info(info, 'record/fusion_train_unsupervised.csv','train')
 
 
     def validate_1epoch(self):
@@ -291,7 +296,7 @@ class Fusion_CNN():
                     'Loss':[round(video_loss,5)],
                     'Prec@1':[round(video_top1,3)],
                     'Prec@5':[round(video_top5,3)]}
-            record_info(info, 'record/rgb_test_supervised.csv','test')
+            record_info(info, 'record/rgb_test_unsupervised.csv','test')
         return video_top1, video_loss
 
     def frame2_video_level_accuracy(self):

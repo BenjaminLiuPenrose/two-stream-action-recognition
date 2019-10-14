@@ -86,18 +86,18 @@ class LinearAverage(nn.Module):
 # =======================================================================================
 # ================== 0801 workable version ==================================================
 class LinearAverageWithWeights(nn.Module):
-    def __init__(self, inputSize, outputSize, T = 0.07, momentum = 0.5, sample_duration = 1, n_samples_for_each_video = 1):
+    def __init__(self, inputSize, outputSize, T = 0.07, momentum = 0.5, sample_duration = 1, n_samples_for_each_video = 1, concat = 1):
         super(LinearAverageWithWeights, self).__init__()
         stdv = 1. / math.sqrt(inputSize/3)
         # if torch.cuda.is_available():
         #     torch.cuda.manual_seed_all(42)
         # input low_dim, output ndata
         self.weights =  nn.Parameter(
-                        F.normalize(torch.rand(outputSize * n_samples_for_each_video, inputSize).mul_(2*stdv).add_(-stdv)) ,
+                        F.normalize(torch.rand(outputSize * n_samples_for_each_video, inputSize * concat).mul_(2*stdv).add_(-stdv)) ,
                         requires_grad = True
                         ).cuda()
         self.memory =  nn.Parameter(
-                        F.normalize(torch.rand(outputSize * n_samples_for_each_video, inputSize).mul_(2*stdv).add_(-stdv)) ,
+                        F.normalize(torch.rand(outputSize * n_samples_for_each_video, inputSize * concat).mul_(2*stdv).add_(-stdv)) ,
                         requires_grad = False
                         ).cuda()
 
@@ -125,6 +125,10 @@ class LinearAverageWithWeights(nn.Module):
 
         out.div_(T)
 
+        log_probabilities = nn.LogSoftmax(x)
+        # NLLLoss(x, class) = -weights[class] * x[class]
+        # -self.weights.index_select(0, y.data) * log_probabilities.index_select(-1, y.data).diag()
+
         with torch.no_grad():
             # st()
             weight_pos = self.memory.index_select(0, y.data.view(-1)) #.resize_as_(x)
@@ -141,6 +145,8 @@ class LinearAverageWithWeights(nn.Module):
             # updated_weight = F.normalize(weight_pos) # TOODO
             self.memory.index_copy_(0, y.data.view(-1), updated_weight )
             # self.memory = nn.Parameter(self.weights, requires_grad = False)
+
+
 
             ### modify 0813
             if y2 is not None:
